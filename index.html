@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KEPCO E&C Service Smart Cafe</title>
+    <title>경영관리실 Cafe Order Mate</title>
     <style>
         :root { --main-color: #004b9d; --bg-color: #f4f7f6; --accent: #3498db; }
         body { font-family: -apple-system, "Malgun Gothic", sans-serif; background-color: var(--bg-color); color: #333; margin: 0; padding: 15px; padding-bottom: 50px; }
         
-        /* 프로페셔널 헤더 스타일 (좌측 정렬) */
+        /* 좌측 정렬 및 세련된 폰트 비중 조절 */
         .header-container { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #eee; text-align: left; }
-        .header-container img { height: 45px; width: auto; }
-        .header-text h1 { font-size: 18px; margin: 0; color: var(--main-color); letter-spacing: -0.5px; }
-        .header-text p { font-size: 12px; margin: 0; color: #7f8c8d; font-weight: bold; }
+        .header-container img { height: 42px; width: auto; }
+        .header-text h1 { font-size: 19px; margin: 0; color: var(--main-color); letter-spacing: -0.5px; font-weight: 800; }
+        .header-text p { font-size: 11px; margin: 2px 0 0 0; color: #7f8c8d; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; }
 
         .box { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; color: #555; }
@@ -32,7 +32,11 @@
         .delete-btn { color: #e74c3c; font-weight: bold; cursor: pointer; padding: 0 10px; }
         .tally-list { background: #f8f9fa; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: bold; border-left: 4px solid var(--main-color); }
         .tally-item { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .total-price { text-align: right; font-size: 18px; font-weight: bold; color: #e74c3c; margin-top: 15px; }
+        
+        .total-summary-box { background: #f0f7ff; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: right; border: 1px solid #d6e8fa; }
+        .total-cups { font-size: 16px; font-weight: bold; color: var(--main-color); margin-bottom: 5px; }
+        .total-price { font-size: 18px; font-weight: bold; color: #e74c3c; }
+        
         .copy-btn { width: 100%; padding: 15px; background: #34495e; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
     </style>
 </head>
@@ -41,14 +45,14 @@
     <div class="header-container">
         <img src="logo.png" alt="CI">
         <div class="header-text">
-            <h1>KEPCO E&C Service Smart Cafe</h1>
-            <p>제공: 경영관리실</p>
+            <h1>경영관리실 Cafe Order Mate</h1>
+            <p>Smart Coffee Aggregator Service</p>
         </div>
     </div>
 
     <div class="box">
         <label>👤 주문자 성함</label>
-        <input type="text" id="userName" placeholder="예: 홍길동">
+        <input type="text" id="userName" placeholder="예: 사장님, 김동명">
 
         <label>1️⃣ 카테고리 선택</label>
         <div class="grid-container" id="categoryGroup">
@@ -86,7 +90,11 @@
         <div class="summary-title">📊 메뉴별 수량 요약</div>
         <div id="tallyList" class="tally-list">-</div>
 
-        <div class="total-price">총 예상 금액: <span id="totalPrice">0</span>원</div>
+        <div class="total-summary-box">
+            <div class="total-cups">총 주문 수량: <span id="totalCups">0</span>잔</div>
+            <div class="total-price">총 결제 금액: <span id="totalPrice">0</span>원</div>
+        </div>
+        
         <button class="copy-btn" onclick="copyToClipboard()">주문 내역 복사하기</button>
     </div>
 
@@ -106,15 +114,12 @@
         let currentTemp = 'ICE';
         let orders = [];
 
-        function init() {
-            setCategory('coffee', document.querySelector('#categoryGroup .btn.active'));
-        }
+        function init() { setCategory('coffee', document.querySelector('#categoryGroup .btn.active')); }
 
         function setCategory(cat, el) {
             currentCategory = cat;
             document.querySelectorAll('#categoryGroup .btn').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
-
             const tempSection = document.getElementById('tempSection');
             if(cat === 'ade' || cat === 'smoothie' || cat === 'frapp') {
                 tempSection.style.display = 'none';
@@ -122,7 +127,6 @@
             } else {
                 tempSection.style.display = 'block';
             }
-
             currentMenu = '';
             currentMenuPrice = 0;
             renderMenus();
@@ -193,6 +197,7 @@
             if (orders.length === 0) {
                 list.innerHTML = '등록된 주문이 없습니다.';
                 tallyList.innerHTML = '-';
+                document.getElementById('totalCups').innerText = '0';
                 document.getElementById('totalPrice').innerText = '0';
                 return;
             }
@@ -211,18 +216,20 @@
             for(let key in menuCount) {
                 tallyList.innerHTML += `<div class="tally-item"><span>${key}</span><span>${menuCount[key]}잔</span></div>`;
             }
+            document.getElementById('totalCups').innerText = orders.length;
             document.getElementById('totalPrice').innerText = total.toLocaleString();
         }
 
         function copyToClipboard() {
             if(orders.length === 0) { alert('주문 내역이 없습니다.'); return; }
-            let text = "🏢 KEPCO E&C Service 카페 주문\n\n[개별 현황]\n";
+            let text = "🏢 경영관리실 Cafe Order Mate\n\n[개별 현황]\n";
             orders.forEach(o => text += `${o.name} : ${o.menuName}\n`);
             text += "\n[카페 제출용 요약]\n";
             let menuCount = {};
             orders.forEach(o => menuCount[o.menuName] = (menuCount[o.menuName] || 0) + 1);
             for(let key in menuCount) text += `${key} : ${menuCount[key]}잔\n`;
-            text += `\n💰 총 결제금액: ${document.getElementById('totalPrice').innerText}원\n(제공: 경영관리실)`;
+            text += `\n☕ 총 주문 수량: ${orders.length}잔`;
+            text += `\n💰 총 결제 금액: ${document.getElementById('totalPrice').innerText}원\n(운영: 경영관리실)`;
             navigator.clipboard.writeText(text).then(() => alert('주문 내역이 복사되었습니다!'));
         }
         window.onload = init;
