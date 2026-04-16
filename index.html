@@ -3,30 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>사내 카페 주문 취합기</title>
+    <title>KEPCO E&C Service Smart Cafe</title>
     <style>
-        :root { --main-color: #2c3e50; --bg-color: #f4f7f6; --accent: #3498db; }
-        body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--main-color); margin: 0; padding: 15px; padding-bottom: 50px; }
-        h2 { text-align: center; font-size: 20px; margin-top: 5px; }
+        :root { --main-color: #004b9d; --bg-color: #f4f7f6; --accent: #3498db; }
+        body { font-family: -apple-system, "Malgun Gothic", sans-serif; background-color: var(--bg-color); color: #333; margin: 0; padding: 15px; padding-bottom: 50px; }
+        
+        /* 프로페셔널 헤더 스타일 (좌측 정렬) */
+        .header-container { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #eee; text-align: left; }
+        .header-container img { height: 45px; width: auto; }
+        .header-text h1 { font-size: 18px; margin: 0; color: var(--main-color); letter-spacing: -0.5px; }
+        .header-text p { font-size: 12px; margin: 0; color: #7f8c8d; font-weight: bold; }
+
         .box { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; color: #555; }
         input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 12px; }
         
-        /* 버튼 그리드 스타일 */
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
-        .btn { padding: 12px 5px; border: 1px solid #ddd; background: white; border-radius: 8px; font-size: 14px; cursor: pointer; text-align: center; word-break: keep-all; display: flex; align-items: center; justify-content: center; line-height: 1.2; transition: all 0.1s; }
-        .btn.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: bold; }
+        .btn { padding: 12px 5px; border: 1px solid #ddd; background: white; border-radius: 8px; font-size: 14px; cursor: pointer; text-align: center; word-break: keep-all; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
+        .btn.active { background: var(--main-color); color: white; border-color: var(--main-color); font-weight: bold; }
         
         .temp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
         .options { display: flex; gap: 15px; margin-bottom: 15px; font-size: 14px; }
         .add-btn { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         
-        /* 결과 영역 스타일 */
-        .summary-title { font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .summary-title { font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .order-list { font-size: 14px; margin-bottom: 15px; }
-        .order-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #eee; }
+        .order-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; }
         .delete-btn { color: #e74c3c; font-weight: bold; cursor: pointer; padding: 0 10px; }
-        .tally-list { background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 15px; font-weight: bold; }
+        .tally-list { background: #f8f9fa; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: bold; border-left: 4px solid var(--main-color); }
         .tally-item { display: flex; justify-content: space-between; margin-bottom: 5px; }
         .total-price { text-align: right; font-size: 18px; font-weight: bold; color: #e74c3c; margin-top: 15px; }
         .copy-btn { width: 100%; padding: 15px; background: #34495e; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
@@ -34,13 +38,19 @@
 </head>
 <body>
 
-    <h2>📝 카페 주문 취합기</h2>
+    <div class="header-container">
+        <img src="logo.png" alt="CI">
+        <div class="header-text">
+            <h1>KEPCO E&C Service Smart Cafe</h1>
+            <p>제공: 경영관리실</p>
+        </div>
+    </div>
 
     <div class="box">
-        <label>👤 이름 (선택)</label>
-        <input type="text" id="userName" placeholder="예: 사장님, 홍길동">
+        <label>👤 주문자 성함</label>
+        <input type="text" id="userName" placeholder="예: 홍길동">
 
-        <label>1️⃣ 카테고리</label>
+        <label>1️⃣ 카테고리 선택</label>
         <div class="grid-container" id="categoryGroup">
             <div class="btn active" onclick="setCategory('coffee', this)">커피</div>
             <div class="btn" onclick="setCategory('latte', this)">라떼</div>
@@ -51,11 +61,10 @@
         </div>
 
         <label>2️⃣ 메뉴 선택</label>
-        <div class="grid-container" id="menuGroup">
-            </div>
+        <div class="grid-container" id="menuGroup"></div>
 
         <div id="tempSection">
-            <label>3️⃣ 온도</label>
+            <label>3️⃣ 온도 설정</label>
             <div class="temp-grid" id="tempGroup">
                 <div class="btn active" onclick="setTemp('ICE', this)">ICE 🧊</div>
                 <div class="btn" onclick="setTemp('HOT', this)">HOT 🔥</div>
@@ -67,22 +76,21 @@
             <label><input type="checkbox" id="tumbler" onchange="updatePrice()"> 텀블러(-100원)</label>
         </div>
 
-        <button class="add-btn" onclick="addOrder()">추가하기 (<span id="currentPrice">0</span>원)</button>
+        <button class="add-btn" onclick="addOrder()">내역 추가하기 (<span id="currentPrice">0</span>원)</button>
     </div>
 
     <div class="box">
-        <div class="summary-title">👤 개별 주문 내역</div>
-        <div id="orderList" class="order-list">내역이 없습니다.</div>
+        <div class="summary-title">📜 실시간 취합 현황</div>
+        <div id="orderList" class="order-list">등록된 주문이 없습니다.</div>
 
-        <div class="summary-title">📊 메뉴별 총 수량 (카페 제출용)</div>
+        <div class="summary-title">📊 메뉴별 수량 요약</div>
         <div id="tallyList" class="tally-list">-</div>
 
-        <div class="total-price">총 결제액: <span id="totalPrice">0</span>원</div>
-        <button class="copy-btn" onclick="copyToClipboard()">클립보드 복사 (카톡 공유용)</button>
+        <div class="total-price">총 예상 금액: <span id="totalPrice">0</span>원</div>
+        <button class="copy-btn" onclick="copyToClipboard()">주문 내역 복사하기</button>
     </div>
 
     <script>
-        // 전달해주신 사진/엑셀 데이터 완벽 반영
         const menuData = {
             coffee: { "에스프레소": 1300, "아메리카노": 1300, "카페라떼": 1700, "카푸치노": 1700, "바닐라라떼": 2000, "돌체라떼": 2000, "카페모카": 2000, "민트모카": 2000, "헤이즐넛라떼": 2000, "카라멜마끼아또": 2000 },
             latte: { "스팀밀크": 1300, "녹차라떼": 1900, "고구마라떼": 1900, "초코라떼": 1900, "홍차라떼": 2100, "미숫가루": 1900 },
@@ -99,7 +107,6 @@
         let orders = [];
 
         function init() {
-            // 초기 화면을 '커피' 탭으로 세팅
             setCategory('coffee', document.querySelector('#categoryGroup .btn.active'));
         }
 
@@ -109,7 +116,6 @@
             el.classList.add('active');
 
             const tempSection = document.getElementById('tempSection');
-            // 에이드, 스무디, 프라푸치노는 무조건 ICE이므로 온도 선택 숨김
             if(cat === 'ade' || cat === 'smoothie' || cat === 'frapp') {
                 tempSection.style.display = 'none';
                 currentTemp = 'ICE';
@@ -126,14 +132,11 @@
         function renderMenus() {
             const menuGroup = document.getElementById('menuGroup');
             menuGroup.innerHTML = '';
-            
             for(let item in menuData[currentCategory]) {
                 let btn = document.createElement('div');
                 btn.className = 'btn';
-                btn.innerHTML = `${item}`;
-                btn.onclick = function() {
-                    setMenu(item, menuData[currentCategory][item], this);
-                };
+                btn.innerHTML = item;
+                btn.onclick = function() { setMenu(item, menuData[currentCategory][item], this); };
                 menuGroup.appendChild(btn);
             }
         }
@@ -154,127 +157,74 @@
 
         function updatePrice() {
             let priceDisplay = document.getElementById('currentPrice');
-            
-            if(!currentMenu) {
-                priceDisplay.innerText = '0';
-                return;
-            }
-
+            if(!currentMenu) { priceDisplay.innerText = '0'; return; }
             let price = currentMenuPrice;
             if(document.getElementById('shotAdd').checked) price += 300;
             if(document.getElementById('tumbler').checked) price -= 100;
-            
             priceDisplay.innerText = price;
         }
 
         function addOrder() {
             let name = document.getElementById('userName').value.trim();
-            
-            if(!currentMenu) { alert('메뉴를 먼저 눌러주세요!'); return; }
-            if(!name) name = "익명"; 
-
+            if(!currentMenu) { alert('메뉴를 선택해주세요!'); return; }
+            if(!name) name = "익명";
             const price = parseInt(document.getElementById('currentPrice').innerText);
-
             let options = [];
             if(document.getElementById('shotAdd').checked) options.push('샷추가');
             if(document.getElementById('tumbler').checked) options.push('텀블러');
-            
-            // 온도와 옵션을 합쳐서 최종 메뉴 이름 생성
             let finalMenuName = `[${currentTemp}] ${currentMenu}`;
             if(options.length > 0) finalMenuName += ` (${options.join(',')})`;
-
             orders.push({ name: name, menuName: finalMenuName, price: price });
-            
-            // 입력 후 이름, 샷추가/텀블러 초기화 (다음 사람 입력 편의)
             document.getElementById('userName').value = '';
             document.getElementById('shotAdd').checked = false;
             document.getElementById('tumbler').checked = false;
-            
             currentMenu = '';
             currentMenuPrice = 0;
             document.querySelectorAll('#menuGroup .btn').forEach(b => b.classList.remove('active'));
             updatePrice();
-            
             renderOrders();
         }
 
-        function removeOrder(index) {
-            orders.splice(index, 1);
-            renderOrders();
-        }
+        function removeOrder(index) { orders.splice(index, 1); renderOrders(); }
 
         function renderOrders() {
             const list = document.getElementById('orderList');
             const tallyList = document.getElementById('tallyList');
-            
             if (orders.length === 0) {
-                list.innerHTML = '내역이 없습니다.';
+                list.innerHTML = '등록된 주문이 없습니다.';
                 tallyList.innerHTML = '-';
                 document.getElementById('totalPrice').innerText = '0';
                 return;
             }
-
             list.innerHTML = '';
             let total = 0;
-            let menuCount = {}; 
-
-            // 1. 개별 리스트 출력 및 수량 합산
+            let menuCount = {};
             orders.forEach((o, index) => {
                 total += o.price;
-                
                 list.innerHTML += `<div class="order-item">
                     <div><b>${o.name}</b> : ${o.menuName}</div>
-                    <div><span class="delete-btn" onclick="removeOrder(${index})">X</span></div>
+                    <div><span class="delete-btn" onclick="removeOrder(${index})">삭제</span></div>
                 </div>`;
-
-                if(menuCount[o.menuName]) {
-                    menuCount[o.menuName]++;
-                } else {
-                    menuCount[o.menuName] = 1;
-                }
+                menuCount[o.menuName] = (menuCount[o.menuName] || 0) + 1;
             });
-
-            // 2. 카페 제출용 요약 출력
             tallyList.innerHTML = '';
             for(let key in menuCount) {
-                tallyList.innerHTML += `<div class="tally-item">
-                    <span>${key}</span>
-                    <span style="color:#27ae60;">${menuCount[key]}잔</span>
-                </div>`;
+                tallyList.innerHTML += `<div class="tally-item"><span>${key}</span><span>${menuCount[key]}잔</span></div>`;
             }
-
             document.getElementById('totalPrice').innerText = total.toLocaleString();
         }
 
         function copyToClipboard() {
             if(orders.length === 0) { alert('주문 내역이 없습니다.'); return; }
-            
-            let text = "📝 사내 카페 주문 내역\n\n";
-            text += "==== [개별 내역] ====\n";
-            orders.forEach(o => {
-                text += `${o.name} : ${o.menuName}\n`;
-            });
-
-            text += "\n==== [카페 제출용] ====\n";
-            
+            let text = "🏢 KEPCO E&C Service 카페 주문\n\n[개별 현황]\n";
+            orders.forEach(o => text += `${o.name} : ${o.menuName}\n`);
+            text += "\n[카페 제출용 요약]\n";
             let menuCount = {};
-            orders.forEach(o => {
-                if(menuCount[o.menuName]) menuCount[o.menuName]++;
-                else menuCount[o.menuName] = 1;
-            });
-
-            for(let key in menuCount) {
-                text += `${key} : ${menuCount[key]}잔\n`;
-            }
-
-            text += `\n💰 총 금액: ${document.getElementById('totalPrice').innerText}원`;
-
-            navigator.clipboard.writeText(text).then(() => {
-                alert('복사 완료! 메모장이나 카톡에 바로 붙여넣기 하시면 됩니다.');
-            });
+            orders.forEach(o => menuCount[o.menuName] = (menuCount[o.menuName] || 0) + 1);
+            for(let key in menuCount) text += `${key} : ${menuCount[key]}잔\n`;
+            text += `\n💰 총 결제금액: ${document.getElementById('totalPrice').innerText}원\n(제공: 경영관리실)`;
+            navigator.clipboard.writeText(text).then(() => alert('주문 내역이 복사되었습니다!'));
         }
-
-        // 페이지가 열리면 init 함수 실행
         window.onload = init;
     </script>
 </body>
