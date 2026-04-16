@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>사내 카페 주문 취합기</title>
+    <style>
+        :root { --main-color: #2c3e50; --bg-color: #f4f7f6; --accent: #3498db; }
+        body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--main-color); margin: 0; padding: 15px; padding-bottom: 50px; }
+        h2 { text-align: center; font-size: 20px; margin-top: 5px; }
+        .box { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; color: #555; }
+        input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 12px; }
+        .row { display: flex; gap: 10px; }
+        .row > div { flex: 1; }
+        .btn-group { display: flex; gap: 5px; margin-bottom: 12px; }
+        .btn { flex: 1; padding: 12px 0; border: 1px solid #ddd; background: white; border-radius: 8px; font-size: 15px; cursor: pointer; text-align: center; }
+        .btn.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: bold; }
+        .options { display: flex; gap: 15px; margin-bottom: 15px; font-size: 14px; }
+        .add-btn { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
+        /* 결과 영역 스타일 */
+        .summary-title { font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .order-list { font-size: 14px; margin-bottom: 15px; }
+        .order-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #eee; }
+        .delete-btn { color: #e74c3c; font-weight: bold; cursor: pointer; padding: 0 10px; }
+        .tally-list { background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 15px; font-weight: bold; }
+        .tally-item { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .total-price { text-align: right; font-size: 18px; font-weight: bold; color: #e74c3c; margin-top: 15px; }
+        .copy-btn { width: 100%; padding: 15px; background: #34495e; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <h2>📝 카페 주문 취합기</h2>
+
+    <div class="box">
+        <div class="row">
+            <div>
+                <label>이름 (선택)</label>
+                <input type="text" id="userName" placeholder="예: 사장님">
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                <label>카테고리</label>
+                <select id="category" onchange="updateMenu()">
+                    <option value="">선택</option>
+                    <option value="coffee">커피</option>
+                    <option value="tea">티 (TEA)</option>
+                    <option value="latte">라떼</option>
+                    <option value="ade">에이드(ICE)</option>
+                    <option value="smoothie">스무디(ICE)</option>
+                    <option value="frapp">프라푸치노(ICE)</option>
+                </select>
+            </div>
+            <div>
+                <label>메뉴</label>
+                <select id="menu" onchange="updatePrice()"></select>
+            </div>
+        </div>
+
+        <label>온도</label>
+        <div class="btn-group" id="tempGroup">
+            <div class="btn active" onclick="setTemp('ICE', this)">ICE 🧊</div>
+            <div class="btn" onclick="setTemp('HOT', this)">HOT 🔥</div>
+        </div>
+
+        <div class="options">
+            <label><input type="checkbox" id="shotAdd" onchange="updatePrice()"> 샷 추가(+300원)</label>
+            <label><input type="checkbox" id="tumbler" onchange="updatePrice()"> 텀블러(-100원)</label>
+        </div>
+
+        <button class="add-btn" onclick="addOrder()">추가하기 (<span id="currentPrice">0</span>원)</button>
+    </div>
+
+    <div class="box">
+        <div class="summary-title">👤 개별 주문 내역</div>
+        <div id="orderList" class="order-list">내역이 없습니다.</div>
+
+        <div class="summary-title">📊 메뉴별 총 수량 (카페 제출용)</div>
+        <div id="tallyList" class="tally-list">-</div>
+
+        <div class="total-price">총 결제액: <span id="totalPrice">0</span>원</div>
+        <button class="copy-btn" onclick="copyToClipboard()">클립보드 복사 (카톡 공유용)</button>
+    </div>
+
+    <script>
+        const menuData = {
+            coffee: { "에스프레소": 1300, "아메리카노": 1300, "카페라떼": 1700, "카푸치노": 1700, "바닐라라떼": 2000, "돌체라떼": 2000, "카페모카": 2000, "민트모카": 2000, "헤이즐넛라떼": 2000, "카라멜마끼아또": 2000 },
+            tea: { "자몽차": 1500, "레몬차": 1500, "생강차": 1500, "유자차": 1500, "제주청귤차": 1500, "루이보스": 1500, "히비스커스": 1500, "페퍼민트": 1500, "캐모마일": 1500, "자스민": 1500, "녹차": 1500, "얼그레이": 1500, "아이스티(복숭아)": 1500
