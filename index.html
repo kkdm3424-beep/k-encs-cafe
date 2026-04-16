@@ -10,12 +10,14 @@
         h2 { text-align: center; font-size: 20px; margin-top: 5px; }
         .box { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; color: #555; }
-        input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 12px; }
-        .row { display: flex; gap: 10px; }
-        .row > div { flex: 1; }
-        .btn-group { display: flex; gap: 5px; margin-bottom: 12px; }
-        .btn { flex: 1; padding: 12px 0; border: 1px solid #ddd; background: white; border-radius: 8px; font-size: 15px; cursor: pointer; text-align: center; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 12px; }
+        
+        /* 버튼 그리드 스타일 */
+        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
+        .btn { padding: 12px 5px; border: 1px solid #ddd; background: white; border-radius: 8px; font-size: 14px; cursor: pointer; text-align: center; word-break: keep-all; display: flex; align-items: center; justify-content: center; line-height: 1.2; transition: all 0.1s; }
         .btn.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: bold; }
+        
+        .temp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
         .options { display: flex; gap: 15px; margin-bottom: 15px; font-size: 14px; }
         .add-btn { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         
@@ -35,36 +37,29 @@
     <h2>📝 카페 주문 취합기</h2>
 
     <div class="box">
-        <div class="row">
-            <div>
-                <label>이름 (선택)</label>
-                <input type="text" id="userName" placeholder="예: 사장님">
-            </div>
+        <label>👤 이름 (선택)</label>
+        <input type="text" id="userName" placeholder="예: 사장님, 홍길동">
+
+        <label>1️⃣ 카테고리</label>
+        <div class="grid-container" id="categoryGroup">
+            <div class="btn active" onclick="setCategory('coffee', this)">커피</div>
+            <div class="btn" onclick="setCategory('latte', this)">라떼</div>
+            <div class="btn" onclick="setCategory('tea', this)">티</div>
+            <div class="btn" onclick="setCategory('ade', this)">에이드</div>
+            <div class="btn" onclick="setCategory('smoothie', this)">스무디</div>
+            <div class="btn" onclick="setCategory('frapp', this)">프라푸치노</div>
         </div>
 
-        <div class="row">
-            <div>
-                <label>카테고리</label>
-                <select id="category" onchange="updateMenu()">
-                    <option value="">선택</option>
-                    <option value="coffee">커피</option>
-                    <option value="tea">티 (TEA)</option>
-                    <option value="latte">라떼</option>
-                    <option value="ade">에이드(ICE)</option>
-                    <option value="smoothie">스무디(ICE)</option>
-                    <option value="frapp">프라푸치노(ICE)</option>
-                </select>
+        <label>2️⃣ 메뉴 선택</label>
+        <div class="grid-container" id="menuGroup">
             </div>
-            <div>
-                <label>메뉴</label>
-                <select id="menu" onchange="updatePrice()"></select>
-            </div>
-        </div>
 
-        <label>온도</label>
-        <div class="btn-group" id="tempGroup">
-            <div class="btn active" onclick="setTemp('ICE', this)">ICE 🧊</div>
-            <div class="btn" onclick="setTemp('HOT', this)">HOT 🔥</div>
+        <div id="tempSection">
+            <label>3️⃣ 온도</label>
+            <div class="temp-grid" id="tempGroup">
+                <div class="btn active" onclick="setTemp('ICE', this)">ICE 🧊</div>
+                <div class="btn" onclick="setTemp('HOT', this)">HOT 🔥</div>
+            </div>
         </div>
 
         <div class="options">
@@ -87,6 +82,200 @@
     </div>
 
     <script>
+        // 전달해주신 사진/엑셀 데이터 완벽 반영
         const menuData = {
             coffee: { "에스프레소": 1300, "아메리카노": 1300, "카페라떼": 1700, "카푸치노": 1700, "바닐라라떼": 2000, "돌체라떼": 2000, "카페모카": 2000, "민트모카": 2000, "헤이즐넛라떼": 2000, "카라멜마끼아또": 2000 },
-            tea: { "자몽차": 1500, "레몬차": 1500, "생강차": 1500, "유자차": 1500, "제주청귤차": 1500, "루이보스": 1500, "히비스커스": 1500, "페퍼민트": 1500, "캐모마일": 1500, "자스민": 1500, "녹차": 1500, "얼그레이": 1500, "아이스티(복숭아)": 1500
+            latte: { "스팀밀크": 1300, "녹차라떼": 1900, "고구마라떼": 1900, "초코라떼": 1900, "홍차라떼": 2100, "미숫가루": 1900 },
+            tea: { "자몽차": 1500, "레몬차": 1500, "생강차": 1500, "레몬생강차": 1500, "유자차": 1500, "제주청귤차": 1500, "루이보스": 1500, "히비스커스": 1500, "페퍼민트": 1500, "캐모마일": 1500, "자스민": 1500, "녹차": 1500, "얼그레이": 1500, "아이스티(복숭아)": 1500, "아이스티(레몬)": 1500, "감로차": 1500 },
+            ade: { "청귤에이드": 2000, "깔라만시에이드": 2000, "청포도에이드": 2000, "자몽에이드": 2500, "레몬에이드": 2500 },
+            smoothie: { "요거트스무디": 1800, "딸기스무디": 1800, "블루베리스무디": 1800, "키위스무디": 1800, "요거트딸기": 2000, "요거트키위": 2000, "요거트블루베리": 2000 },
+            frapp: { "자바칩프라푸치노": 2400, "쿠키앤크림프라푸치노": 2400, "녹차프라푸치노": 2300 }
+        };
+
+        let currentCategory = 'coffee';
+        let currentMenu = '';
+        let currentMenuPrice = 0;
+        let currentTemp = 'ICE';
+        let orders = [];
+
+        function init() {
+            // 초기 화면을 '커피' 탭으로 세팅
+            setCategory('coffee', document.querySelector('#categoryGroup .btn.active'));
+        }
+
+        function setCategory(cat, el) {
+            currentCategory = cat;
+            document.querySelectorAll('#categoryGroup .btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+
+            const tempSection = document.getElementById('tempSection');
+            // 에이드, 스무디, 프라푸치노는 무조건 ICE이므로 온도 선택 숨김
+            if(cat === 'ade' || cat === 'smoothie' || cat === 'frapp') {
+                tempSection.style.display = 'none';
+                currentTemp = 'ICE';
+            } else {
+                tempSection.style.display = 'block';
+            }
+
+            currentMenu = '';
+            currentMenuPrice = 0;
+            renderMenus();
+            updatePrice();
+        }
+
+        function renderMenus() {
+            const menuGroup = document.getElementById('menuGroup');
+            menuGroup.innerHTML = '';
+            
+            for(let item in menuData[currentCategory]) {
+                let btn = document.createElement('div');
+                btn.className = 'btn';
+                btn.innerHTML = `${item}`;
+                btn.onclick = function() {
+                    setMenu(item, menuData[currentCategory][item], this);
+                };
+                menuGroup.appendChild(btn);
+            }
+        }
+
+        function setMenu(menu, price, el) {
+            currentMenu = menu;
+            currentMenuPrice = price;
+            document.querySelectorAll('#menuGroup .btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            updatePrice();
+        }
+
+        function setTemp(temp, el) {
+            currentTemp = temp;
+            document.querySelectorAll('#tempGroup .btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function updatePrice() {
+            let priceDisplay = document.getElementById('currentPrice');
+            
+            if(!currentMenu) {
+                priceDisplay.innerText = '0';
+                return;
+            }
+
+            let price = currentMenuPrice;
+            if(document.getElementById('shotAdd').checked) price += 300;
+            if(document.getElementById('tumbler').checked) price -= 100;
+            
+            priceDisplay.innerText = price;
+        }
+
+        function addOrder() {
+            let name = document.getElementById('userName').value.trim();
+            
+            if(!currentMenu) { alert('메뉴를 먼저 눌러주세요!'); return; }
+            if(!name) name = "익명"; 
+
+            const price = parseInt(document.getElementById('currentPrice').innerText);
+
+            let options = [];
+            if(document.getElementById('shotAdd').checked) options.push('샷추가');
+            if(document.getElementById('tumbler').checked) options.push('텀블러');
+            
+            // 온도와 옵션을 합쳐서 최종 메뉴 이름 생성
+            let finalMenuName = `[${currentTemp}] ${currentMenu}`;
+            if(options.length > 0) finalMenuName += ` (${options.join(',')})`;
+
+            orders.push({ name: name, menuName: finalMenuName, price: price });
+            
+            // 입력 후 이름, 샷추가/텀블러 초기화 (다음 사람 입력 편의)
+            document.getElementById('userName').value = '';
+            document.getElementById('shotAdd').checked = false;
+            document.getElementById('tumbler').checked = false;
+            
+            currentMenu = '';
+            currentMenuPrice = 0;
+            document.querySelectorAll('#menuGroup .btn').forEach(b => b.classList.remove('active'));
+            updatePrice();
+            
+            renderOrders();
+        }
+
+        function removeOrder(index) {
+            orders.splice(index, 1);
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const list = document.getElementById('orderList');
+            const tallyList = document.getElementById('tallyList');
+            
+            if (orders.length === 0) {
+                list.innerHTML = '내역이 없습니다.';
+                tallyList.innerHTML = '-';
+                document.getElementById('totalPrice').innerText = '0';
+                return;
+            }
+
+            list.innerHTML = '';
+            let total = 0;
+            let menuCount = {}; 
+
+            // 1. 개별 리스트 출력 및 수량 합산
+            orders.forEach((o, index) => {
+                total += o.price;
+                
+                list.innerHTML += `<div class="order-item">
+                    <div><b>${o.name}</b> : ${o.menuName}</div>
+                    <div><span class="delete-btn" onclick="removeOrder(${index})">X</span></div>
+                </div>`;
+
+                if(menuCount[o.menuName]) {
+                    menuCount[o.menuName]++;
+                } else {
+                    menuCount[o.menuName] = 1;
+                }
+            });
+
+            // 2. 카페 제출용 요약 출력
+            tallyList.innerHTML = '';
+            for(let key in menuCount) {
+                tallyList.innerHTML += `<div class="tally-item">
+                    <span>${key}</span>
+                    <span style="color:#27ae60;">${menuCount[key]}잔</span>
+                </div>`;
+            }
+
+            document.getElementById('totalPrice').innerText = total.toLocaleString();
+        }
+
+        function copyToClipboard() {
+            if(orders.length === 0) { alert('주문 내역이 없습니다.'); return; }
+            
+            let text = "📝 사내 카페 주문 내역\n\n";
+            text += "==== [개별 내역] ====\n";
+            orders.forEach(o => {
+                text += `${o.name} : ${o.menuName}\n`;
+            });
+
+            text += "\n==== [카페 제출용] ====\n";
+            
+            let menuCount = {};
+            orders.forEach(o => {
+                if(menuCount[o.menuName]) menuCount[o.menuName]++;
+                else menuCount[o.menuName] = 1;
+            });
+
+            for(let key in menuCount) {
+                text += `${key} : ${menuCount[key]}잔\n`;
+            }
+
+            text += `\n💰 총 금액: ${document.getElementById('totalPrice').innerText}원`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('복사 완료! 메모장이나 카톡에 바로 붙여넣기 하시면 됩니다.');
+            });
+        }
+
+        // 페이지가 열리면 init 함수 실행
+        window.onload = init;
+    </script>
+</body>
+</html>
