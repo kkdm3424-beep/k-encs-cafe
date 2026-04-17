@@ -8,7 +8,6 @@
         :root { --main-color: #004b9d; --bg-color: #f4f7f6; --accent: #3498db; }
         body { font-family: -apple-system, "Malgun Gothic", sans-serif; background-color: var(--bg-color); color: #333; margin: 0; padding: 15px; padding-bottom: 50px; }
         
-        /* 좌측 정렬 및 세련된 폰트 비중 조절 */
         .header-container { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #eee; text-align: left; }
         .header-container img { height: 42px; width: auto; }
         .header-text h1 { font-size: 19px; margin: 0; color: var(--main-color); letter-spacing: -0.5px; font-weight: 800; }
@@ -17,7 +16,12 @@
         .box { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; color: #555; }
         input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 12px; }
+        textarea { width: 100%; height: 70px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; resize: none; font-family: inherit; }
         
+        /* 사장님 전용 퀵버튼 스타일 */
+        .boss-btn { width: 100%; padding: 12px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .boss-btn:active { background: #ffeeba; }
+
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
         .btn { padding: 12px 5px; border: 1px solid #ddd; background: white; border-radius: 8px; font-size: 14px; cursor: pointer; text-align: center; word-break: keep-all; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
         .btn.active { background: var(--main-color); color: white; border-color: var(--main-color); font-weight: bold; }
@@ -51,8 +55,10 @@
     </div>
 
     <div class="box">
+        <button class="boss-btn" onclick="addBossOrder()">👑 사장님 전용 퀵 추가 (HOT 카페라떼)</button>
+
         <label>👤 주문자 성함</label>
-        <input type="text" id="userName" placeholder="예: 사장님, 부장님, 과장님">
+        <input type="text" id="userName" placeholder="예: 부장님, 과장님">
 
         <label>1️⃣ 카테고리 선택</label>
         <div class="grid-container" id="categoryGroup">
@@ -90,6 +96,9 @@
         <div class="summary-title">📊 메뉴별 수량 요약</div>
         <div id="tallyList" class="tally-list">-</div>
 
+        <div class="summary-title">📝 기타 / 기성품 메모</div>
+        <textarea id="memoField" placeholder="기성품 음료, 디저트 등 기타 요청사항을 자유롭게 적어주세요."></textarea>
+
         <div class="total-summary-box">
             <div class="total-cups">총 주문 수량: <span id="totalCups">0</span>잔</div>
             <div class="total-price">총 결제 금액: <span id="totalPrice">0</span>원</div>
@@ -99,13 +108,14 @@
     </div>
 
     <script>
+        // 엑셀 추가 데이터 완벽 반영 (매실, 오미자, 복숭아에이드, 망고스무디 등)
         const menuData = {
             coffee: { "에스프레소": 1300, "아메리카노": 1300, "카페라떼": 1700, "카푸치노": 1700, "바닐라라떼": 2000, "돌체라떼": 2000, "카페모카": 2000, "민트모카": 2000, "헤이즐넛라떼": 2000, "카라멜마끼아또": 2000 },
-            latte: { "스팀밀크": 1300, "녹차라떼": 1900, "고구마라떼": 1900, "초코라떼": 1900, "홍차라떼": 2100, "미숫가루": 1900 },
-            tea: { "자몽차": 1500, "레몬차": 1500, "생강차": 1500, "레몬생강차": 1500, "유자차": 1500, "제주청귤차": 1500, "루이보스": 1500, "히비스커스": 1500, "페퍼민트": 1500, "캐모마일": 1500, "자스민": 1500, "녹차": 1500, "얼그레이": 1500, "아이스티(복숭아)": 1500, "아이스티(레몬)": 1500, "감로차": 1500 },
-            ade: { "청귤에이드": 2000, "깔라만시에이드": 2000, "청포도에이드": 2000, "자몽에이드": 2500, "레몬에이드": 2500 },
-            smoothie: { "요거트스무디": 1800, "딸기스무디": 1800, "블루베리스무디": 1800, "키위스무디": 1800, "요거트딸기": 2000, "요거트키위": 2000, "요거트블루베리": 2000 },
-            frapp: { "자바칩프라푸치노": 2400, "쿠키앤크림프라푸치노": 2400, "녹차프라푸치노": 2300 }
+            latte: { "스팀밀크": 1300, "녹차": 1900, "고구마": 1900, "초코": 1900, "홍차": 2100, "미숫가루": 1900 },
+            tea: { "자몽": 1500, "레몬": 1500, "생강": 1500, "레몬생강": 1500, "유자차": 1500, "제주청귤차": 1500, "루이보스": 1500, "히비스커스": 1500, "페퍼민트": 1500, "캐모마일": 1500, "자스민": 1500, "녹차": 1500, "얼그레이": 1500, "복숭아 아이스티": 1500, "레몬 아이스티": 1500, "감로": 1500, "매실": 1500, "오미자": 1500 },
+            ade: { "청귤에이드": 2000, "깔라만시에이드": 2000, "청포도에이드": 2000, "자몽에이드": 2500, "레몬에이드": 2500, "복숭아에이드": 2500 },
+            smoothie: { "요거트스무디": 1800, "딸기스무디": 1800, "블루베리스무디": 1800, "키위스무디": 1800, "요거트딸기": 2000, "요거트키위": 2000, "요거트블루베리": 2000, "망고스무디": 2300 },
+            frapp: { "자바칩": 2400, "쿠키앤크림": 2400, "녹차": 2300 }
         };
 
         let currentCategory = 'coffee';
@@ -168,6 +178,14 @@
             priceDisplay.innerText = price;
         }
 
+        // 사장님 전용 메뉴 추가 함수
+        function addBossOrder() {
+            orders.push({ name: "사장님", menuName: "[HOT] 카페라떼", price: 1700 });
+            renderOrders();
+            // 스크롤을 살짝 아래로 내려서 추가된 것을 보여줌
+            document.getElementById('orderList').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
         function addOrder() {
             let name = document.getElementById('userName').value.trim();
             if(!currentMenu) { alert('메뉴를 선택해주세요!'); return; }
@@ -221,15 +239,30 @@
         }
 
         function copyToClipboard() {
-            if(orders.length === 0) { alert('주문 내역이 없습니다.'); return; }
+            if(orders.length === 0 && document.getElementById('memoField').value.trim() === '') { 
+                alert('주문 내역이나 메모가 없습니다.'); 
+                return; 
+            }
+            
             let text = "🏢 경영관리실 Cafe Order Mate\n\n[개별 현황]\n";
-            orders.forEach(o => text += `${o.name} : ${o.menuName}\n`);
-            text += "\n[카페 제출용 요약]\n";
-            let menuCount = {};
-            orders.forEach(o => menuCount[o.menuName] = (menuCount[o.menuName] || 0) + 1);
-            for(let key in menuCount) text += `${key} : ${menuCount[key]}잔\n`;
-            text += `\n☕ 총 주문 수량: ${orders.length}잔`;
-            text += `\n💰 총 결제 금액: ${document.getElementById('totalPrice').innerText}원\n(운영: 경영관리실)`;
+            if(orders.length > 0) {
+                orders.forEach(o => text += `${o.name} : ${o.menuName}\n`);
+                text += "\n[카페 제출용 요약]\n";
+                let menuCount = {};
+                orders.forEach(o => menuCount[o.menuName] = (menuCount[o.menuName] || 0) + 1);
+                for(let key in menuCount) text += `${key} : ${menuCount[key]}잔\n`;
+                text += `\n☕ 총 주문 수량: ${orders.length}잔`;
+                text += `\n💰 총 결제 금액: ${document.getElementById('totalPrice').innerText}원\n`;
+            }
+
+            // 메모 내용이 있으면 추가
+            let memo = document.getElementById('memoField').value.trim();
+            if(memo !== '') {
+                text += `\n[📝 기타 메모]\n${memo}\n`;
+            }
+            
+            text += `\n(운영: 경영관리실)`;
+
             navigator.clipboard.writeText(text).then(() => alert('주문 내역이 복사되었습니다!'));
         }
         window.onload = init;
