@@ -18,7 +18,6 @@
         input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 12px; }
         textarea { width: 100%; height: 70px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; resize: none; font-family: inherit; }
         
-        /* 퀵버튼 그룹 스타일 */
         .quick-btn-group { display: flex; gap: 8px; margin-bottom: 15px; }
         .boss-btn { flex: 1; padding: 10px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; word-break: keep-all; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .meeting-btn { flex: 1; padding: 10px; background: #e8f4fd; color: #004b9d; border: 1px solid #cce5ff; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; word-break: keep-all; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -30,7 +29,10 @@
         .btn.active { background: var(--main-color); color: white; border-color: var(--main-color); font-weight: bold; }
         
         .temp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
-        .options { display: flex; gap: 15px; margin-bottom: 15px; font-size: 14px; }
+        
+        /* 옵션 영역 스타일: 체크박스가 많아져서 화면이 좁을 경우 자연스럽게 줄바꿈되도록 수정 */
+        .options { display: flex; gap: 12px; margin-bottom: 15px; font-size: 14px; flex-wrap: wrap; }
+        
         .add-btn { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         
         .summary-title { font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
@@ -89,6 +91,7 @@
 
         <div class="options">
             <label><input type="checkbox" id="shotAdd" onchange="updatePrice()"> 샷 추가(+300원)</label>
+            <label><input type="checkbox" id="decafAdd" onchange="updatePrice()"> 디카페인(+300원)</label>
             <label><input type="checkbox" id="tumbler" onchange="updatePrice()"> 텀블러(-100원)</label>
         </div>
 
@@ -174,23 +177,23 @@
             el.classList.add('active');
         }
 
+        // 가격 업데이트 함수에 디카페인 로직 추가
         function updatePrice() {
             let priceDisplay = document.getElementById('currentPrice');
             if(!currentMenu) { priceDisplay.innerText = '0'; return; }
             let price = currentMenuPrice;
             if(document.getElementById('shotAdd').checked) price += 300;
+            if(document.getElementById('decafAdd').checked) price += 300;
             if(document.getElementById('tumbler').checked) price -= 100;
             priceDisplay.innerText = price;
         }
 
-        // 사장님 단독 추가 함수
         function addBossOrder() {
             orders.push({ name: "사장님", menuName: "[HOT] 카페라떼", price: 1700 });
             renderOrders();
             document.getElementById('orderList').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        // 주례회의 일괄 추가 함수
         function addMeetingOrders() {
             const meetingMembers = [
                 { name: "사장님", menuName: "[HOT] 카페라떼", price: 1700 },
@@ -210,6 +213,7 @@
             document.getElementById('orderList').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
+        // 주문 담기 함수에 디카페인 배열 추가
         function addOrder() {
             let name = document.getElementById('userName').value.trim();
             if(!currentMenu) { alert('메뉴를 선택해주세요!'); return; }
@@ -217,13 +221,18 @@
             const price = parseInt(document.getElementById('currentPrice').innerText);
             let options = [];
             if(document.getElementById('shotAdd').checked) options.push('샷추가');
+            if(document.getElementById('decafAdd').checked) options.push('디카페인');
             if(document.getElementById('tumbler').checked) options.push('텀블러');
             let finalMenuName = `[${currentTemp}] ${currentMenu}`;
             if(options.length > 0) finalMenuName += ` (${options.join(',')})`;
             orders.push({ name: name, menuName: finalMenuName, price: price });
+            
+            // 입력 폼 초기화 시 디카페인 체크박스도 해제
             document.getElementById('userName').value = '';
             document.getElementById('shotAdd').checked = false;
+            document.getElementById('decafAdd').checked = false;
             document.getElementById('tumbler').checked = false;
+            
             currentMenu = '';
             currentMenuPrice = 0;
             document.querySelectorAll('#menuGroup .btn').forEach(b => b.classList.remove('active'));
