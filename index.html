@@ -18,9 +18,12 @@
         input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 12px; }
         textarea { width: 100%; height: 70px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; resize: none; font-family: inherit; }
         
-        /* 사장님 전용 퀵버튼 스타일 */
-        .boss-btn { width: 100%; padding: 12px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        /* 퀵버튼 그룹 스타일 */
+        .quick-btn-group { display: flex; gap: 8px; margin-bottom: 15px; }
+        .boss-btn { flex: 1; padding: 10px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; word-break: keep-all; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .meeting-btn { flex: 1; padding: 10px; background: #e8f4fd; color: #004b9d; border: 1px solid #cce5ff; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; word-break: keep-all; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .boss-btn:active { background: #ffeeba; }
+        .meeting-btn:active { background: #cce5ff; }
 
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
         .btn { padding: 12px 5px; border: 1px solid #ddd; background: white; border-radius: 8px; font-size: 14px; cursor: pointer; text-align: center; word-break: keep-all; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
@@ -55,7 +58,10 @@
     </div>
 
     <div class="box">
-        <button class="boss-btn" onclick="addBossOrder()">👑 사장님 전용 퀵 추가 (HOT 카페라떼)</button>
+        <div class="quick-btn-group">
+            <button class="boss-btn" onclick="addBossOrder()">👑 사장님 단독 추가</button>
+            <button class="meeting-btn" onclick="addMeetingOrders()">🤝 주례회의 일괄 추가 (10명)</button>
+        </div>
 
         <label>👤 주문자 성함</label>
         <input type="text" id="userName" placeholder="예: 부장님, 과장님">
@@ -108,7 +114,6 @@
     </div>
 
     <script>
-        // 엑셀 추가 데이터 완벽 반영 (매실, 오미자, 복숭아에이드, 망고스무디 등)
         const menuData = {
             coffee: { "에스프레소": 1300, "아메리카노": 1300, "카페라떼": 1700, "카푸치노": 1700, "바닐라라떼": 2000, "돌체라떼": 2000, "카페모카": 2000, "민트모카": 2000, "헤이즐넛라떼": 2000, "카라멜마끼아또": 2000 },
             latte: { "스팀밀크": 1300, "녹차": 1900, "고구마": 1900, "초코": 1900, "홍차": 2100, "미숫가루": 1900 },
@@ -178,11 +183,30 @@
             priceDisplay.innerText = price;
         }
 
-        // 사장님 전용 메뉴 추가 함수
+        // 사장님 단독 추가 함수
         function addBossOrder() {
             orders.push({ name: "사장님", menuName: "[HOT] 카페라떼", price: 1700 });
             renderOrders();
-            // 스크롤을 살짝 아래로 내려서 추가된 것을 보여줌
+            document.getElementById('orderList').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // 주례회의 일괄 추가 함수
+        function addMeetingOrders() {
+            const meetingMembers = [
+                { name: "사장님", menuName: "[HOT] 카페라떼", price: 1700 },
+                { name: "강정민 재무관리부장님", menuName: "[HOT] 카페라떼", price: 1700 },
+                { name: "배성진 계약관리반장님", menuName: "[ICE] 카페라떼", price: 1700 },
+                { name: "허완 안전사업관리부장님", menuName: "[HOT] 아메리카노", price: 1300 },
+                { name: "곽태복 미화자산부장님", menuName: "[HOT] 아메리카노", price: 1300 },
+                { name: "함태근 시설관리부장님", menuName: "[HOT] 아메리카노 (샷추가)", price: 1600 },
+                { name: "김태엽 차량관리부장님", menuName: "[ICE] 아메리카노", price: 1300 },
+                { name: "김은실 전산통신부장님", menuName: "[ICE] 아메리카노", price: 1300 },
+                { name: "김중용 경비안내부장님", menuName: "[HOT] 생강", price: 1500 },
+                { name: "서정철 기획총무부장님", menuName: "[HOT] 페퍼민트", price: 1500 }
+            ];
+
+            orders.push(...meetingMembers);
+            renderOrders();
             document.getElementById('orderList').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
@@ -255,7 +279,6 @@
                 text += `\n💰 총 결제 금액: ${document.getElementById('totalPrice').innerText}원\n`;
             }
 
-            // 메모 내용이 있으면 추가
             let memo = document.getElementById('memoField').value.trim();
             if(memo !== '') {
                 text += `\n[📝 기타 메모]\n${memo}\n`;
